@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Influensia - AI KOL Matching Platform</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { jakarta: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: { blue: '#2563EB', dark: '#1E40AF', light: '#DBEAFE' },
+            accent: { yellow: '#F59E0B', gold: '#D97706' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .talent-card, .course-card { transition: all 0.3s ease; }
+    .talent-card:hover, .course-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(37, 99, 235, 0.12); }
+    .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .toast-slide { animation: slideIn 0.3s ease-out forwards, slideOut 0.3s ease-in 2.7s forwards; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    .ai-scan { animation: aiScan 2s ease-in-out infinite; }
+    @keyframes aiScan { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+    .pulse-ring { animation: pulseRing 2s ease-out infinite; }
+    @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); } 70% { box-shadow: 0 0 0 20px rgba(37, 99, 235, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
+    .faq-card { transition: all 0.3s ease; }
+    .faq-card.open .faq-icon { transform: rotate(180deg); }
+    .accordion-item.active .accordion-icon { transform: rotate(180deg); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+  </style>
+</head>
+<body class="h-full bg-gray-50 text-gray-800">
+
+  <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
+        <div class="w-40 h-10 bg-brand-blue rounded-full flex items-center justify-center">
+          <img src="inilogo.png" alt="Logo" class="">
+        </div>
+      </div>
+
+      <div class="hidden md:flex items-center gap-8">
+        <button onclick="navigateTo('home')" class="text-sm text-gray-600 hover:text-brand-blue font-medium transition-colors">Home</button>
+        <button onclick="navigateTo('marketplace')" class="text-sm text-gray-600 hover:text-brand-blue font-medium transition-colors">Talents</button>
+        <button onclick="navigateTo('courses')" class="text-sm text-gray-600 hover:text-brand-blue font-medium transition-colors">Courses</button>
+        <div class="h-4 w-px bg-gray-200"></div>
+        <button onclick="navigateTo('talent-dashboard')" class="text-sm text-gray-600 hover:text-brand-blue font-medium transition-colors flex items-center gap-1">
+            <i data-lucide="user-circle" class="w-4 h-4"></i> Creator Login
+        </button>
+        <button onclick="navigateTo('admin-dashboard')" class="text-sm text-gray-600 hover:text-brand-blue font-medium transition-colors flex items-center gap-1">
+             <i data-lucide="shield" class="w-4 h-4"></i> Admin
+        </button>
+        <button onclick="navigateTo('campaign-wizard')" class="text-sm bg-brand-blue text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-brand-dark transition-colors shadow-md shadow-blue-500/20">Buat Campaign</button>
+      </div>
+
+      <button class="md:hidden text-gray-600 hover:text-brand-blue" onclick="toggleMobileMenu()">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 absolute w-full left-0 shadow-lg">
+      <div class="flex flex-col p-4 space-y-3">
+        <button onclick="navigateTo('home'); toggleMobileMenu();" class="text-left text-gray-700 font-medium py-2">Home</button>
+        <button onclick="navigateTo('marketplace'); toggleMobileMenu();" class="text-left text-gray-700 font-medium py-2">Talents</button>
+        <button onclick="navigateTo('courses'); toggleMobileMenu();" class="text-left text-gray-700 font-medium py-2">Courses</button>
+        <button onclick="navigateTo('talent-dashboard'); toggleMobileMenu();" class="text-left text-gray-700 font-medium py-2">Creator Login</button>
+        <button onclick="navigateTo('admin-dashboard'); toggleMobileMenu();" class="text-left text-gray-700 font-medium py-2">Admin Dashboard</button>
+        <button onclick="navigateTo('campaign-wizard'); toggleMobileMenu();" class="w-full text-center bg-brand-blue text-white py-3 rounded-xl font-semibold">Buat Campaign</button>
+      </div>
+    </div>
+  </nav>
+
+  <div id="app" class="w-full h-full">
+
+    <div id="screen-home" class="screen fade-in">
+      <section class="bg-gradient-to-br from-brand-blue via-blue-600 to-indigo-700 text-white py-20 md:py-32 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-block bg-white/10 backdrop-blur px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+            🚀 AI-Powered KOL Matching Platform
+          </div>
+          <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+            Temukan Kreator Terbaik untuk Brand Anda
+          </h1>
+          <p class="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+            Platform AI yang menghubungkan Brand & UMKM dengan Nano-Influencer terpercaya. Mulai campaign dalam hitungan menit.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onclick="navigateTo('marketplace')" class="bg-accent-yellow text-gray-900 font-bold px-8 py-4 rounded-xl hover:bg-yellow-400 transition-colors shadow-lg">
+              Jelajahi Kreator
+            </button>
+            <button onclick="navigateTo('campaign-wizard')" class="bg-white text-brand-blue font-bold px-8 py-4 rounded-xl hover:bg-blue-50 transition-colors shadow-lg flex justify-center items-center gap-2">
+              <i data-lucide="sparkles" class="w-5 h-5"></i> Buat Campaign
+            </button>
+          </div>
+          <div class="flex justify-center gap-8 md:gap-16 mt-16 text-blue-100">
+            <div class="text-center">
+              <p class="text-3xl font-bold text-white">500+</p>
+              <p class="text-sm mt-1">Verified Creators</p>
+            </div>
+            <div class="text-center">
+              <p class="text-3xl font-bold text-white">2.5M</p>
+              <p class="text-sm mt-1">Total Audience</p>
+            </div>
+            <div class="text-center">
+              <p class="text-3xl font-bold text-white">98%</p>
+              <p class="text-sm mt-1">Success Rate</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-4 py-16">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900">Featured Talents</h2>
+            <p class="text-gray-500 mt-2">Kreator terbaik siap membantu campaign Anda</p>
+          </div>
+          <button onclick="navigateTo('marketplace')" class="text-brand-blue font-semibold hover:underline">Lihat Semua →</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="talent-grid-home"></div>
+      </section>
+
+      <section class="bg-blue-50 py-16">
+        <div class="max-w-7xl mx-auto px-4">
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h2 class="text-3xl font-bold text-gray-900">Featured Courses</h2>
+              <p class="text-gray-500 mt-2">Tingkatkan skill ngonten dengan kelas dari ahlinya</p>
+            </div>
+            <button onclick="navigateTo('courses')" class="text-brand-blue font-semibold hover:underline">Lihat Semua →</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="featured-courses-grid"></div>
+        </div>
+      </section>
+
+      <section class="max-w-4xl mx-auto px-4 py-16">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-bold text-gray-900">Pertanyaan Umum</h2>
+          <p class="text-gray-500 mt-2">Pelajari lebih lanjut tentang Influensia</p>
+        </div>
+        <div class="space-y-4" id="faq-list"></div>
+      </section>
+
+      <footer class="bg-gray-900 text-white py-12 mt-10">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <img src="BIRUUU.png" alt="Logo" class="w-10 h-10">
+                <span class="font-bold text-xl">Influensia</span>
+            </div>
+            <p class="text-gray-400 text-sm">© 2026 Influensia. Hak Cipta Dilindungi.</p>
+        </div>
+      </footer>
+    </div>
+
+    <div id="screen-marketplace" class="screen hidden fade-in bg-gray-50 min-h-[calc(100vh-64px)] py-10">
+      <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Talent Marketplace</h1>
+        <p class="text-gray-500 mb-8">Browse dan hire talent terbaik untuk campaign brand Anda</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="marketplace-grid"></div>
+      </div>
+    </div>
+
+    <div id="screen-talent-profile" class="screen hidden fade-in bg-gray-50 min-h-[calc(100vh-64px)] pb-20">
+      <div class="h-48 md:h-64 bg-gradient-to-r from-brand-dark to-brand-blue w-full relative"></div>
+      <div class="max-w-5xl mx-auto px-4 -mt-24 relative z-10">
+          <button onclick="navigateTo('marketplace')" class="flex items-center gap-2 text-white hover:text-blue-100 mb-6 font-medium bg-black/20 backdrop-blur-sm px-4 py-2 rounded-full w-fit transition-colors">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
+          </button>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-1">
+                  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden text-center p-6">
+                      <div class="w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg overflow-hidden -mt-16 bg-gray-200 mb-4">
+                          <img id="profile-avatar" class="w-full h-full object-cover">
+                      </div>
+                      <h1 id="profile-name" class="text-2xl font-bold text-gray-900 tracking-tight"></h1>
+                      <p class="text-gray-500 text-sm mb-4">Content Creator</p>
+                      <div id="profile-niches" class="flex flex-wrap justify-center gap-2 mb-6"></div>
+                      <div class="border-t border-b border-gray-100 py-4 mb-6 bg-gray-50/50 rounded-xl">
+                          <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Estimasi Rate</p>
+                          <p id="profile-rate" class="text-xl font-bold text-brand-blue"></p>
+                      </div>
+                      <button onclick="showToast('Fitur direct chat sedang dalam perbaikan', 'info')" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors shadow-sm flex items-center justify-center gap-2">
+                          Hire Talent
+                      </button>
+                  </div>
+                  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+                      <h3 class="font-bold text-gray-900 mb-4">Statistik</h3>
+                      <div class="space-y-4">
+                          <div class="flex justify-between items-center"><span class="text-sm text-gray-600">Followers</span><span id="profile-followers" class="font-bold"></span></div>
+                          <div class="flex justify-between items-center"><span class="text-sm text-gray-600">Engagement</span><span id="profile-engagement" class="font-bold text-green-600"></span></div>
+                          <div class="flex justify-between items-center"><span class="text-sm text-gray-600">Project Selesai</span><span id="profile-projects" class="font-bold"></span></div>
+                      </div>
+                  </div>
+              </div>
+              <div class="lg:col-span-2 space-y-6">
+                  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                      <h2 class="text-xl font-bold text-gray-900 mb-4">Tentang Kreator</h2>
+                      <p id="profile-bio" class="text-gray-600 leading-relaxed"></p>
+                  </div>
+                  <div>
+                      <h2 class="text-xl font-bold text-gray-900 mb-4">Portfolio Highlight</h2>
+                      <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="portfolio-gallery"></div>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <div id="screen-campaign-wizard" class="screen hidden fade-in bg-gray-50 min-h-[calc(100vh-64px)] py-10">
+      <div class="max-w-4xl mx-auto px-4">
+        
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Buat Campaign AI</h1>
+            <p class="text-gray-500">Isi detail di bawah ini, dan AI kami akan mencarikan kreator paling relevan.</p>
+        </div>
+
+        <div class="flex items-center justify-center gap-4 mb-12 max-w-md mx-auto">
+          <div id="wiz-step-1" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-brand-blue text-white shadow-md transition-colors">1</div>
+          <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden"><div id="wiz-line-1" class="h-full bg-brand-blue w-0 transition-all duration-500"></div></div>
+          <div id="wiz-step-2" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-gray-200 text-gray-500 transition-colors">2</div>
+          <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden"><div id="wiz-line-2" class="h-full bg-brand-blue w-0 transition-all duration-500"></div></div>
+          <div id="wiz-step-3" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-gray-200 text-gray-500 transition-colors">3</div>
+        </div>
+
+        <div id="wizard-step-1" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+          <div class="flex items-center gap-3 mb-8 border-b border-gray-100 pb-4">
+              <div class="p-2 bg-blue-50 rounded-lg"><i data-lucide="file-text" class="w-5 h-5 text-brand-blue"></i></div>
+              <h2 class="text-xl font-bold text-gray-900">Detail Campaign & Brand</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Brand / Usaha <span class="text-red-500">*</span></label>
+              <input type="text" value="Skintific Indonesia" class="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor WhatsApp <span class="text-red-500">*</span></label>
+              <input type="text" value="081234567890" class="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Email Bisnis <span class="text-red-500">*</span></label>
+              <input type="email" value="marketing@skintific.id" class="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none transition-all">
+            </div>
+            <div class="md:col-span-2 border-t border-gray-100 pt-6 mt-2"></div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Campaign <span class="text-red-500">*</span></label>
+              <input type="text" value="Mugwort Acne Clay Stick Promo" class="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori (Niche) <span class="text-red-500">*</span></label>
+              <select id="campaign-niche" class="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none transition-all">
+                <option value="Beauty" selected>Beauty & Skincare</option>
+                <option value="Food">Food & Beverage</option>
+                <option value="Tech">Tech & Gadget</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Platform Utama <span class="text-red-500">*</span></label>
+              <select class="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none transition-all">
+                <option selected>TikTok</option>
+                <option>Instagram Reels</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Total Budget (Rp) <span class="text-red-500">*</span></label>
+              <div class="relative">
+                  <span class="absolute left-4 top-3 text-gray-500 font-medium">Rp</span>
+                  <input type="number" id="campaign-budget" value="1000000" class="w-full border border-gray-200 rounded-xl pl-12 pr-4 py-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none font-bold text-gray-900">
+              </div>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Brief Singkat <span class="text-red-500">*</span></label>
+              <textarea class="w-full border border-gray-200 rounded-xl px-4 py-3 h-24 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none resize-none">Buat video review penggunaan Mugwort Clay Stick selama 3 hari. Tunjukkan before-after kemerahan mereda.</textarea>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Lampirkan File Brief Lengkap (Opsional)</label>
+              <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-brand-blue transition-colors cursor-pointer bg-gray-50">
+                  <i data-lucide="upload-cloud" class="w-8 h-8 text-brand-blue mx-auto mb-2"></i>
+                  <p class="text-sm font-medium text-gray-700">Klik untuk upload file PDF (Max 5MB)</p>
+                  <p class="text-xs text-gray-500 mt-1 font-bold text-green-600">Brief_Campaign_Skintific.pdf terlampir ✓</p>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="goToWizardStep(2)" class="mt-8 w-full bg-brand-blue text-white font-bold py-4 rounded-xl hover:bg-brand-dark transition-all shadow-md flex justify-center items-center gap-2">
+             Mulai Pencarian AI <i data-lucide="sparkles" class="w-5 h-5 text-accent-yellow"></i>
+          </button>
+        </div>
+
+        <div id="wizard-step-2" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+          <div id="ai-processing" class="text-center py-16">
+            <div class="relative w-24 h-24 mx-auto mb-8">
+              <div class="absolute inset-0 bg-brand-light rounded-full pulse-ring"></div>
+              <div class="absolute inset-0 flex items-center justify-center bg-white rounded-full border-4 border-brand-blue/20 shadow-inner">
+                  <i data-lucide="cpu" class="w-10 h-10 text-brand-blue ai-scan"></i>
+              </div>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-3">AI Sedang Menganalisis...</h2>
+            <p id="ai-status-text" class="text-gray-500 font-medium mb-8">Mencocokkan Niche Brand...</p>
+            <div class="w-64 mx-auto bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div id="ai-progress-bar" class="bg-brand-blue h-full rounded-full transition-all duration-300" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div id="ai-results" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500"></i> Hasil Rekomendasi AI
+                    </h2>
+                </div>
+            </div>
+
+            <div id="ai-talents-list" class="space-y-3 mb-8 max-h-[400px] overflow-y-auto pr-2"></div>
+
+            <div class="bg-gray-900 rounded-2xl p-6 text-white shadow-lg sticky bottom-4">
+              <div class="flex justify-between items-end mb-4">
+                <div>
+                    <p class="text-gray-400 text-sm font-medium mb-1">Sisa Budget Campaign</p>
+                    <p id="budget-remaining" class="text-2xl font-bold text-white tracking-tight">Rp 1.000.000</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-gray-400 text-sm font-medium mb-1">Terpilih</p>
+                    <p class="text-xl font-bold"><span id="selected-count" class="text-accent-yellow">0</span> Kreator</p>
+                </div>
+              </div>
+              <div class="w-full bg-gray-700 rounded-full h-2">
+                <div id="budget-bar" class="bg-accent-yellow h-2 rounded-full transition-all duration-500" style="width:100%"></div>
+              </div>
+            </div>
+
+            <div class="flex gap-4 mt-8">
+              <button onclick="goToWizardStep(1)" class="px-6 py-3.5 border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50">Kembali</button>
+              <button id="next-checkout-btn" onclick="goToWizardStep(3)" class="flex-1 bg-brand-blue text-white font-bold py-3.5 rounded-xl hover:bg-brand-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md" disabled>
+                  Lanjut Pembayaran →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="wizard-step-3" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+          <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i data-lucide="shopping-bag" class="w-8 h-8 text-brand-blue"></i>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-900">Review Order</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6 mb-6">
+              <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">Kreator Terpilih</h3>
+              <div id="checkout-summary" class="space-y-3"></div>
+              <div class="border-t border-gray-200 mt-6 pt-4 flex justify-between items-center">
+                  <span class="font-bold text-gray-700">Total Pembayaran</span>
+                  <span id="checkout-total" class="text-2xl font-black text-brand-blue">Rp 0</span>
+              </div>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200/60 rounded-xl p-5 mb-8">
+            <label class="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" id="policy-check" class="mt-1 w-5 h-5 rounded text-brand-blue" checked>
+              <span class="text-sm text-gray-700 leading-relaxed">
+                <strong>Saya menyetujui Replacement Policy.</strong> Jika talent yang dipilih menolak job atau berhalangan, Influensia akan mencarikan kreator pengganti dengan kualitas setara tanpa biaya tambahan.
+              </span>
+            </label>
+          </div>
+
+          <div class="flex gap-4">
+            <button onclick="goToWizardStep(2)" class="px-6 py-4 border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50">Kembali</button>
+            <button onclick="submitCampaign()" class="flex-1 bg-green-500 text-white font-bold py-4 rounded-xl hover:bg-green-600 shadow-md">
+               Kirim Campaign ke Admin ✓
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-courses" class="screen hidden fade-in bg-gray-50 min-h-[calc(100vh-64px)] py-10">
+      <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-3xl font-bold mb-2">Creator Academy</h1>
+        <p class="text-gray-500 mb-8">Katalog kelas unggulan untuk kreator.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="courses-grid"></div>
+      </div>
+    </div>
+
+    <div id="screen-course-detail" class="screen hidden fade-in bg-white min-h-[calc(100vh-64px)] pb-20">
+        <div class="bg-gray-900 w-full h-[30vh] md:h-[50vh] relative group cursor-pointer flex items-center justify-center">
+            <img id="course-header-img" src="" class="absolute inset-0 w-full h-full object-cover opacity-50">
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+            <div class="relative z-10 w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg"><i data-lucide="play" class="w-6 h-6 text-brand-blue ml-1"></i></div>
+            </div>
+        </div>
+  
+        <div class="max-w-4xl mx-auto px-4 py-8">
+            <button onclick="navigateTo('courses')" class="flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-6 font-medium transition-colors w-fit">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Katalog
+            </button>
+            <h1 id="course-detail-title" class="text-3xl font-bold text-gray-900 mb-4 tracking-tight"></h1>
+            
+            <div class="flex gap-6 border-b border-gray-200 mb-8">
+                <button onclick="switchCourseTab('overview', this)" class="course-tab pb-4 border-b-2 border-brand-blue text-brand-blue font-bold">Ikhtisar</button>
+                <button onclick="switchCourseTab('curriculum', this)" class="course-tab pb-4 border-b-2 border-transparent text-gray-500 hover:text-gray-900 font-medium">Kurikulum Modul</button>
+            </div>
+  
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2">
+                    <div id="tab-overview" class="tab-content animate-fadeIn">
+                        <p class="text-gray-600 leading-relaxed text-lg mb-8">Kelas intensif ini dirancang khusus untuk kreator pemula yang ingin memahami algoritma dan memproduksi konten berkualitas tinggi dengan alat sederhana.</p>
+                        <h3 class="font-bold text-gray-900 text-lg mb-4">Yang Akan Anda Pelajari:</h3>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3 text-gray-700"><i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i> Format hook 3 detik yang menahan audiens.</li>
+                            <li class="flex items-start gap-3 text-gray-700"><i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i> Rahasia FYP dan pemahaman analitik organik.</li>
+                            <li class="flex items-start gap-3 text-gray-700"><i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i> Setup lighting dan audio menggunakan HP.</li>
+                        </ul>
+                    </div>
+                    <div id="tab-curriculum" class="tab-content hidden space-y-4">
+                        <div class="accordion-item bg-white border border-gray-200 rounded-xl overflow-hidden active">
+                            <button class="accordion-header w-full px-6 py-4 bg-gray-50 flex items-center justify-between" onclick="toggleAccordion(this)">
+                                <div class="text-left"><span class="font-bold block">Modul 1: Fundamental</span></div>
+                                <i data-lucide="chevron-down" class="accordion-icon w-5 h-5 text-gray-400"></i>
+                            </button>
+                            <div class="accordion-content px-6 py-2 bg-white">
+                                <div class="py-3 flex items-center justify-between border-b border-gray-100 last:border-0"><div class="flex items-center gap-3"><i data-lucide="play-circle" class="w-4 h-4 text-brand-blue"></i> <span class="text-sm">Pengenalan Ekosistem Platform</span></div></div>
+                                <div class="py-3 flex items-center justify-between border-b border-gray-100 last:border-0"><div class="flex items-center gap-3"><i data-lucide="lock" class="w-4 h-4 text-gray-300"></i> <span class="text-sm text-gray-500">Cara Kerja Algoritma 2024</span></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-1">
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-24">
+                        <p class="text-gray-500 text-sm font-medium mb-1">Harga Kelas</p>
+                        <p id="course-detail-price" class="text-3xl font-black text-brand-blue mb-6"></p>
+                        <button onclick="showToast('Mengalihkan ke pembayaran', 'success')" class="w-full bg-brand-blue text-white font-bold py-4 rounded-xl hover:bg-brand-dark transition-all">Beli Kelas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+    <div id="screen-talent-dashboard" class="screen hidden fade-in bg-gray-50 min-h-[calc(100vh-64px)]">
+      <div class="flex flex-col md:flex-row max-w-7xl mx-auto">
+        <div class="hidden md:block w-64 p-6 border-r border-gray-200 min-h-[calc(100vh-64px)] bg-white">
+            <div class="flex items-center gap-3 mb-8">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop" class="w-12 h-12 rounded-full border-2 border-brand-light object-cover">
+                <div>
+                    <p class="font-bold text-gray-900 text-sm">Sarah Ayu</p>
+                    <p class="text-xs text-gray-500">Nano Creator</p>
+                </div>
+            </div>
+            <nav class="space-y-2">
+                <button onclick="switchTalentTab('workspace')" id="nav-workspace" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 text-brand-blue font-semibold"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Workspace</button>
+                <button onclick="switchTalentTab('mycourses')" id="nav-mycourses" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 font-medium"><i data-lucide="book" class="w-5 h-5"></i> My Courses</button>
+                <button onclick="navigateTo('home')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 font-medium mt-10"><i data-lucide="log-out" class="w-5 h-5"></i> Keluar</button>
+            </nav>
+        </div>
+
+        <div class="flex-1 p-4 md:p-8">
+            
+            <div id="talent-tab-workspace" class="talent-tab">
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">Workspace 🚀</h1>
+                <p class="text-gray-500 text-sm mb-8">Kelola tawaran campaign dan project aktif Anda.</p>
+
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm"><p class="text-gray-500 text-sm">Total Pendapatan</p><p class="text-xl font-bold text-brand-blue">Rp 1.250.000</p></div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm"><p class="text-gray-500 text-sm">Project Selesai</p><p class="text-xl font-bold text-gray-900">23</p></div>
+                </div>
+
+                <h2 class="font-bold text-gray-900 text-lg mb-4">Report Campaign Berjalan</h2>
+                <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-10">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex items-center gap-4">
+                            <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-md">Live Tracking</span>
+                            <h3 class="font-bold text-gray-900 text-lg">Skintific Promo Ramadhan</h3>
+                        </div>
+                        <button onclick="viewCampaignReport()" class="text-sm font-bold text-brand-blue bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors">Lihat Detail Report</button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div>
+                            <p class="text-xs text-gray-500 font-semibold uppercase mb-1">Total Views</p>
+                            <p class="text-2xl font-black text-gray-900">12.4K</p>
+                            <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2"><div class="bg-brand-blue h-1.5 rounded-full" style="width: 80%"></div></div>
+                        </div>
+                        <div><p class="text-xs text-gray-500 font-semibold uppercase mb-1">Engagement</p><p class="text-2xl font-black text-gray-900">8.5%</p></div>
+                        <div><p class="text-xs text-gray-500 font-semibold uppercase mb-1">Likes</p><p class="text-2xl font-black text-gray-900">1,054</p></div>
+                        <div><p class="text-xs text-gray-500 font-semibold uppercase mb-1">Deadline Report</p><p class="text-lg font-bold text-gray-900">12 Mei 2026</p></div>
+                    </div>
+                </div>
+
+                <h2 class="font-bold text-gray-900 text-lg mb-4">Tawaran Job Baru (1)</h2>
+                <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm relative overflow-hidden group max-w-lg">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-accent-yellow"></div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-1 rounded-md">Menunggu Respon</span>
+                            <h3 class="font-bold text-gray-900 text-lg mt-2">Foodie Hunt Jakarta</h3>
+                            <p class="text-sm text-gray-500">Brand: BurgerBang • TikTok Video</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-500">Budget Fee</p>
+                            <p class="text-lg font-black text-brand-blue">Rp 75.000</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100 text-sm text-gray-600">
+                        Kunjungi outlet di Senopati. Buat review jujur menu baru Spicy Burger.
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="handleOffer(this, 'reject')" class="px-5 py-2.5 border border-red-200 text-red-600 font-bold rounded-xl text-sm">Tolak</button>
+                        <button onclick="handleOffer(this, 'accept')" class="flex-1 bg-green-500 text-white font-bold py-2.5 rounded-xl text-sm">Terima Job</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="talent-tab-mycourses" class="talent-tab hidden">
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">My Courses 📚</h1>
+                <p class="text-gray-500 text-sm mb-8">Lanjutkan pembelajaran Anda.</p>
+
+                <div class="bg-gray-900 rounded-2xl overflow-hidden shadow-lg mb-8 relative aspect-video flex items-center justify-center border border-gray-800">
+                    <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-40">
+                    <div class="absolute top-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-lg text-white text-xs font-bold flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Sedang Dipelajari
+                    </div>
+                    <div class="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center shadow-lg"><i data-lucide="play" class="w-6 h-6 text-white ml-1"></i></div>
+                    <div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent">
+                        <p class="text-white font-bold text-sm mb-2">Modul 2: Hook 3 Detik Pertama</p>
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="pause" class="w-4 h-4 text-white"></i>
+                            <div class="flex-1 bg-white/30 h-1.5 rounded-full"><div class="w-[45%] h-full bg-brand-blue rounded-full"></div></div>
+                            <span class="text-white text-xs font-mono">04:15 / 10:30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 flex gap-4 items-center">
+                        <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=200" class="w-20 h-20 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-900 text-sm">Mastering TikTok Hooks</h3>
+                            <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2 mb-1"><div class="bg-brand-blue h-1.5 rounded-full" style="width: 45%"></div></div>
+                            <p class="text-xs text-gray-500">Progress: 45%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-campaign-report" class="screen hidden fade-in bg-gray-50 min-h-[calc(100vh-64px)] pb-20 pt-10">
+        <div class="max-w-4xl mx-auto px-4">
+            <button onclick="navigateTo('talent-dashboard')" class="flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-6 font-medium transition-colors w-fit">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Workspace
+            </button>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <div class="flex justify-between items-start border-b border-gray-100 pb-6 mb-6">
+                    <div>
+                        <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">Live Tracker Active</span>
+                        <h1 class="text-2xl font-bold text-gray-900 mt-2">Skintific Promo Ramadhan</h1>
+                        <p class="text-gray-500 text-sm mt-1">Diposting pada: 10 Mei 2026</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Platform</p>
+                        <div class="flex items-center gap-2 font-bold text-gray-900 mt-1"><i data-lucide="smartphone" class="w-5 h-5 text-pink-500"></i> TikTok</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gray-50 rounded-xl p-4 text-center">
+                        <p class="text-xs text-gray-500 font-bold uppercase mb-2">Total Views</p>
+                        <p class="text-3xl font-black text-brand-blue">12.4K</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 text-center">
+                        <p class="text-xs text-gray-500 font-bold uppercase mb-2">Likes</p>
+                        <p class="text-3xl font-black text-gray-900">1,054</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 text-center">
+                        <p class="text-xs text-gray-500 font-bold uppercase mb-2">Comments</p>
+                        <p class="text-3xl font-black text-gray-900">128</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 text-center">
+                        <p class="text-xs text-gray-500 font-bold uppercase mb-2">Eng. Rate</p>
+                        <p class="text-3xl font-black text-green-600">8.5%</p>
+                    </div>
+                </div>
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-gray-900">Submit Final Link</h3>
+                        <p class="text-sm text-gray-600">URL Konten berhasil disubmit dan divalidasi sistem.</p>
+                    </div>
+                    <button class="bg-brand-blue text-white px-4 py-2 rounded-lg font-bold text-sm opacity-50 cursor-not-allowed">Sudah Disubmit ✓</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-admin-dashboard" class="screen hidden fade-in bg-gray-100 min-h-[calc(100vh-64px)]">
+        <div class="flex flex-col md:flex-row max-w-7xl mx-auto">
+            <div class="hidden md:block w-64 p-6 border-r border-gray-200 min-h-[calc(100vh-64px)] bg-gray-900 text-white">
+                <div class="flex items-center gap-2 mb-10"><span class="font-bold text-lg">Admin Panel</span></div>
+                <nav class="space-y-1">
+                    <button onclick="switchAdminTab('overview')" id="nav-admin-overview" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-800 text-white font-medium transition-colors"><i data-lucide="pie-chart" class="w-4 h-4"></i> Overview</button>
+                    <button onclick="switchAdminTab('campaigns')" id="nav-admin-campaigns" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium transition-colors"><i data-lucide="briefcase" class="w-4 h-4"></i> Campaigns</button>
+                </nav>
+            </div>
+            
+            <div class="flex-1 p-6 md:p-8">
+                
+                <div id="admin-tab-overview" class="admin-tab">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-8">Dashboard Overview</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-white p-5 rounded-xl border-l-4 border-brand-blue shadow-sm">
+                            <p class="text-gray-500 text-sm">Total Creators</p><p class="text-2xl font-bold mt-1">540</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border-l-4 border-accent-yellow shadow-sm">
+                            <p class="text-gray-500 text-sm">Active Campaigns</p><p class="text-2xl font-bold mt-1">42</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border-l-4 border-green-500 shadow-sm">
+                            <p class="text-gray-500 text-sm">Revenue</p><p class="text-2xl font-bold mt-1">Rp 15.5M</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-5 border-b"><h2 class="font-bold">Recent Signups (Talent)</h2></div>
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50">
+                                <tr><th class="px-6 py-3">Name</th><th class="px-6 py-3">Niche</th><th class="px-6 py-3">Followers</th><th class="px-6 py-3">Date</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr><td class="px-6 py-4 font-bold">Dimas Anggara</td><td class="px-6 py-4"><span class="bg-blue-50 text-brand-blue px-2 py-1 rounded text-xs">Fashion</span></td><td class="px-6 py-4">15.8K</td><td class="px-6 py-4 text-gray-500">Today, 10:30</td></tr>
+                                <tr><td class="px-6 py-4 font-bold">Alya Putri</td><td class="px-6 py-4"><span class="bg-blue-50 text-brand-blue px-2 py-1 rounded text-xs">Beauty</span></td><td class="px-6 py-4">12.5K</td><td class="px-6 py-4 text-gray-500">Yesterday</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="admin-tab-campaigns" class="admin-tab hidden">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Campaign Management</h1>
+                            <p class="text-gray-500 text-sm">Verifikasi pembayaran dan pantau status campaign.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <select class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none">
+                                <option>Semua Status</option>
+                                <option>Pending Payment</option>
+                                <option>Processing</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 font-medium text-gray-500">ID & Brand</th>
+                                    <th class="px-6 py-4 font-medium text-gray-500">Detail Talent</th>
+                                    <th class="px-6 py-4 font-medium text-gray-500">Total Budget</th>
+                                    <th class="px-6 py-4 font-medium text-gray-500">Status</th>
+                                    <th class="px-6 py-4 font-medium text-gray-500 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr id="admin-order-1" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <p class="text-xs font-mono text-gray-400 mb-1">#CMP-001</p>
+                                        <p class="font-bold text-gray-900">Skintific Indonesia</p>
+                                        <p class="text-xs text-gray-500 mt-1">TikTok • Beauty</p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex -space-x-2">
+                                            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop">
+                                            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop">
+                                        </div>
+                                        <p class="text-xs text-brand-blue font-medium mt-2">2 Talent Terpilih</p>
+                                    </td>
+                                    <td class="px-6 py-5 font-bold text-gray-900">Rp 1.000.000</td>
+                                    <td class="px-6 py-5">
+                                        <span id="admin-status-1" class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider">Pending Payment</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button id="admin-btn-verify-1" onclick="verifyPayment(1)" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-xs transition-colors shadow-sm">Verifikasi Pembayaran</button>
+                                        <button onclick="showToast('Menampilkan detail order', 'info')" class="text-gray-500 hover:text-brand-blue p-2"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <p class="text-xs font-mono text-gray-400 mb-1">#CMP-002</p>
+                                        <p class="font-bold text-gray-900">BurgerBang Jakarta</p>
+                                        <p class="text-xs text-gray-500 mt-1">Instagram • Food</p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop">
+                                        <p class="text-xs text-brand-blue font-medium mt-2">Bagus Wira</p>
+                                    </td>
+                                    <td class="px-6 py-5 font-bold text-gray-900">Rp 75.000</td>
+                                    <td class="px-6 py-5">
+                                        <span class="bg-blue-100 text-brand-blue px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider">Processing</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button class="bg-gray-100 text-gray-400 px-4 py-2 rounded-lg font-bold text-xs cursor-not-allowed">Terverifikasi ✓</button>
+                                        <button onclick="showToast('Menampilkan detail order', 'info')" class="text-gray-500 hover:text-brand-blue p-2"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+  </div> <div id="success-modal" class="hidden fixed inset-0 z-[100] bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative">
+        <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30">
+            <i data-lucide="check" class="w-10 h-10 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Berhasil 🎉</h2>
+        <p class="text-gray-500 text-sm mb-8">Campaign telah masuk sistem. Influensia Agency akan segera menghubungi via WA.</p>
+        <button onclick="closeSuccessModal()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl">Kembali ke Beranda</button>
+    </div>
+  </div>
+
+  <script>
+    const talentDatabase = [
+      { id: 1, name: 'Sarah Ayu', niche: ['Beauty','Skincare'], followers: '12.5K', engagement: '4.8%', rate: 'Rp 35.000', rateMax: 35000, tier: 'Nano', bio: 'Beauty creator fokus review jujur.', projects: 23, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop' },
+      { id: 2, name: 'Rizki Fadli', niche: ['Tech','Gadget'], followers: '8.2K', engagement: '6.2%', rate: 'Rp 25.000', rateMax: 25000, tier: 'Nano', bio: 'Tech enthusiast mahasiswa.', projects: 12, avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&h=200&fit=crop' },
+      { id: 3, name: 'Nadia Putri', niche: ['Beauty','Lifestyle'], followers: '25.3K', engagement: '5.1%', rate: 'Rp 100.000', rateMax: 100000, tier: 'Micro', bio: 'Makeup & Lifestyle vlogger.', projects: 45, avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop' },
+      { id: 4, name: 'Dimas Arya', niche: ['Fashion','Lifestyle'], followers: '15.8K', engagement: '7.3%', rate: 'Rp 50.000', rateMax: 50000, tier: 'Nano', bio: 'Streetwear fashion creator.', projects: 31, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop' },
+      { id: 5, name: 'Citra Dewi', niche: ['Beauty','Skincare'], followers: '45.7K', engagement: '4.5%', rate: 'Rp 250.000', rateMax: 250000, tier: 'Micro', bio: 'Makeup tutorial dan tips harian.', projects: 67, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop' }
+    ];
+
+    const courseDatabase = [
+      { id: 1, title: 'Mastering TikTok Hooks (2024)', category: 'Konten', price: 'Rp 49.000', rating: 4.9, duration: '2 Jam', thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=250&fit=crop' },
+      { id: 2, title: 'Edit CapCut Pro', category: 'Editing', price: 'Rp 99.000', rating: 4.8, duration: '3 Jam', thumbnail: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=250&fit=crop' },
+      { id: 3, title: 'Menulis Brief & Negosiasi', category: 'Bisnis', price: 'Rp 149.000', rating: 5.0, duration: '1 Jam', thumbnail: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop' }
+    ];
+
+    const faqData = [
+      { q: 'Bagaimana AI mencocokkan talent?', a: 'Sistem kami menganalisis Niche, Platform, dan Budget Anda, lalu memfilter ribuan database kreator untuk mencari audiens paling relevan.' },
+      { q: 'Berapa rate paling murah untuk kreator?', a: 'Untuk Nano Influencer (Followers 1k-10k), rate mulai dari Rp 25.000 hingga Rp 50.000 per video.' },
+      { q: 'Apa itu Replacement Policy?', a: 'Jika talent menolak job, agensi kami akan otomatis menggantinya dengan talent lain yang spesifikasinya setara tanpa biaya tambahan.' },
+      { q: 'Bagaimana sistem pembayaran?', a: 'Sistem Escrow. Anda bayar di awal ke sistem kami, dana baru dicairkan ke kreator setelah konten selesai.' },
+      { q: 'Apakah kreator terverifikasi?', a: 'Ya, semua kreator melewati screening manual dan beberapa di antaranya alumni sertifikasi Influensia Academy.' }
+    ];
+
+    let selectedTalents = [];
+    let initialBudget = 1000000;
+
+    function navigateTo(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      const target = document.getElementById('screen-' + screenId);
+      if (target) { target.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      lucide.createIcons();
+    }
+    function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
+
+    // Init UI
+    document.getElementById('talent-grid-home').innerHTML = talentDatabase.slice(0,4).map(t => createTalentCard(t)).join('');
+    document.getElementById('marketplace-grid').innerHTML = talentDatabase.map(t => createTalentCard(t)).join('');
+    document.getElementById('featured-courses-grid').innerHTML = courseDatabase.map(c => createCourseCard(c)).join('');
+    document.getElementById('courses-grid').innerHTML = courseDatabase.map(c => createCourseCard(c)).join('');
+    
+    document.getElementById('faq-list').innerHTML = faqData.map(f => `
+      <div class="faq-card bg-gray-50 rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+        <button onclick="toggleFAQ(this)" class="w-full px-6 py-5 flex justify-between text-left focus:outline-none bg-gray-50">
+          <span class="font-bold text-gray-900">${f.q}</span><i data-lucide="chevron-down" class="faq-icon w-5 h-5 text-gray-400"></i>
+        </button>
+        <div class="faq-content hidden px-6 pb-5 text-gray-600 bg-gray-50 border-t border-gray-200 pt-3">${f.a}</div>
+      </div>
+    `).join('');
+
+    function createTalentCard(t) {
+        return `<div onclick="viewTalentProfile(${t.id})" class="cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full hover:-translate-y-1 transition-transform">
+          <div class="relative h-48 bg-gray-100"><img src="${t.avatar}" class="w-full h-full object-cover"><div class="absolute top-3 right-3 bg-white/90 text-xs font-black px-2.5 py-1 rounded-md">${t.tier}</div></div>
+          <div class="p-5 flex flex-col flex-1"><h3 class="font-bold text-lg">${t.name}</h3><p class="text-xs text-brand-blue font-bold">${t.niche.join(', ')}</p><div class="mt-auto pt-4"><p class="text-lg font-black">${t.rate}</p></div></div>
+        </div>`;
+    }
+    
+    function createCourseCard(c) {
+        return `<div onclick="viewCourseDetail(${c.id})" class="cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:-translate-y-1 transition-transform">
+            <div class="h-44 relative"><img src="${c.thumbnail}" class="w-full h-full object-cover"></div>
+            <div class="p-6"><span class="text-[10px] bg-blue-50 text-brand-blue px-2 py-1 rounded font-bold uppercase">${c.category}</span><h3 class="font-bold text-lg mt-2">${c.title}</h3><p class="text-xl font-black mt-4">${c.price}</p></div>
+        </div>`;
+    }
+    
+    function toggleFAQ(btn) {
+      const card = btn.closest('.faq-card');
+      const content = card.querySelector('.faq-content');
+      card.classList.toggle('open'); content.classList.toggle('hidden');
+    }
+
+    // Detail Profile Logic
+    function viewTalentProfile(id) {
+        const t = talentDatabase.find(x => x.id === id);
+        document.getElementById('profile-avatar').src = t.avatar;
+        document.getElementById('profile-name').textContent = t.name;
+        document.getElementById('profile-rate').textContent = t.rate;
+        document.getElementById('profile-followers').textContent = t.followers;
+        document.getElementById('profile-engagement').textContent = t.engagement;
+        document.getElementById('profile-projects').textContent = t.projects;
+        document.getElementById('profile-bio').textContent = t.bio;
+        document.getElementById('profile-niches').innerHTML = t.niche.map(n => `<span class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1.5 rounded-full">${n}</span>`).join('');
+        
+        const imgs = ['https://images.unsplash.com/photo-1512496015851-a1cafb14a566?w=200', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200'];
+        document.getElementById('portfolio-gallery').innerHTML = imgs.map(img => `
+            <div class="aspect-square rounded-xl overflow-hidden bg-gray-200"><img src="${img}" class="w-full h-full object-cover"></div>
+        `).join('');
+        navigateTo('talent-profile');
+    }
+
+    // Detail Course Logic
+    function viewCourseDetail(id) {
+        const c = courseDatabase.find(x => x.id === id);
+        document.getElementById('course-detail-title').textContent = c.title;
+        document.getElementById('course-detail-price').textContent = c.price;
+        document.getElementById('course-header-img').src = c.thumbnail;
+        switchCourseTab('overview', document.querySelector('.course-tab'));
+        navigateTo('course-detail');
+    }
+
+    function switchCourseTab(tabId, btn) {
+        document.querySelectorAll('.course-tab').forEach(t => { t.classList.remove('border-brand-blue', 'text-brand-blue', 'font-bold'); t.classList.add('border-transparent', 'text-gray-500'); });
+        btn.classList.remove('border-transparent', 'text-gray-500'); btn.classList.add('border-brand-blue', 'text-brand-blue', 'font-bold');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+    }
+
+    function toggleAccordion(btn) {
+        const item = btn.closest('.accordion-item');
+        const content = item.querySelector('.accordion-content');
+        item.classList.toggle('active'); content.classList.toggle('hidden');
+    }
+
+    // View Campaign Report Logic
+    function viewCampaignReport() { navigateTo('campaign-report'); }
+
+    // AI WIZARD LOGIC (FIXED)
+    function goToWizardStep(step) {
+        [1,2,3].forEach(i => document.getElementById(`wizard-step-${i}`).classList.add('hidden'));
+        document.getElementById(`wizard-step-${step}`).classList.remove('hidden');
+        [1,2,3].forEach(i => {
+            const circle = document.getElementById(`wiz-step-${i}`);
+            const line = document.getElementById(`wiz-line-${i}`);
+            if(i < step) { circle.className='w-10 h-10 rounded-full flex items-center justify-center bg-green-500 text-white'; circle.innerHTML='✓'; if(line) line.style.width='100%'; }
+            else if(i===step) { circle.className='w-10 h-10 rounded-full flex items-center justify-center bg-brand-blue text-white shadow-md'; circle.innerHTML=i; if(line) line.style.width='50%'; }
+            else { circle.className='w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 text-gray-500'; circle.innerHTML=i; if(line) line.style.width='0%'; }
+        });
+        if (step === 2) {
+            initialBudget = parseInt(document.getElementById('campaign-budget').value) || 1000000;
+            document.getElementById('ai-processing').classList.remove('hidden');
+            document.getElementById('ai-results').classList.add('hidden');
+            runAIAnimation();
+        } else if (step === 3) renderCheckout();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function runAIAnimation() {
+        let p = 0;
+        const interval = setInterval(() => {
+            p += Math.random() * 25;
+            if(p>100) p=100;
+            document.getElementById('ai-progress-bar').style.width = p + '%';
+            if(p===100) {
+                clearInterval(interval);
+                setTimeout(() => { document.getElementById('ai-processing').classList.add('hidden'); document.getElementById('ai-results').classList.remove('hidden'); renderAIList(); }, 400);
+            }
+        }, 300);
+    }
+
+    function renderAIList() {
+        const niche = document.getElementById('campaign-niche').value;
+        const filtered = talentDatabase.filter(t => t.niche.includes(niche.split(' ')[0]));
+        const displayList = filtered.length > 0 ? filtered : talentDatabase.slice(0, 4);
+        selectedTalents = [];
+        
+        document.getElementById('ai-talents-list').innerHTML = displayList.map(t => `
+            <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 shadow-sm transition-colors duration-200" id="card-talent-${t.id}">
+                <div class="flex items-center gap-4"><img src="${t.avatar}" class="w-12 h-12 rounded-full object-cover">
+                    <div><p class="font-bold text-gray-900">${t.name}</p><p class="text-xs text-gray-500">${t.followers} Folls</p></div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="font-black text-gray-900">Rp ${(t.rateMax).toLocaleString('id-ID')}</p>
+                    <button id="btn-sel-${t.id}" onclick="toggleSelectTalent(${t.id}, ${t.rateMax})" class="px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-bold text-gray-500 transition-colors">Pilih</button>
+                </div>
+            </div>
+        `).join('');
+        updateBudgetCalc();
+    }
+
+    function toggleSelectTalent(id, rate) {
+        const btn = document.getElementById(`btn-sel-${id}`);
+        const card = document.getElementById(`card-talent-${id}`);
+        const idx = selectedTalents.findIndex(t => t.id === id);
+
+        if (idx === -1) {
+            const currentTotal = selectedTalents.reduce((sum, t) => sum + t.rate, 0);
+            if (currentTotal + rate > initialBudget) { showToast('Budget tidak mencukupi!', 'error'); return; }
+            selectedTalents.push({id, rate});
+            btn.classList.remove('border-gray-300', 'text-gray-500');
+            btn.classList.add('bg-brand-blue', 'border-brand-blue', 'text-white');
+            btn.innerText = 'Terpilih ✓';
+            card.classList.add('border-brand-blue', 'bg-blue-50');
+        } else {
+            selectedTalents.splice(idx, 1);
+            btn.classList.remove('bg-brand-blue', 'border-brand-blue', 'text-white');
+            btn.classList.add('border-gray-300', 'text-gray-500');
+            btn.innerText = 'Pilih';
+            card.classList.remove('border-brand-blue', 'bg-blue-50');
+        }
+        updateBudgetCalc();
+    }
+
+    function updateBudgetCalc() {
+        const total = selectedTalents.reduce((sum, t) => sum + t.rate, 0);
+        const rem = initialBudget - total;
+        document.getElementById('budget-remaining').textContent = `Rp ${rem.toLocaleString('id-ID')}`;
+        document.getElementById('selected-count').textContent = selectedTalents.length;
+        document.getElementById('budget-bar').style.width = ((rem / initialBudget) * 100) + '%';
+        document.getElementById('next-checkout-btn').disabled = selectedTalents.length === 0;
+    }
+
+    function renderCheckout() {
+        document.getElementById('checkout-summary').innerHTML = selectedTalents.map(st => {
+            const t = talentDatabase.find(x => x.id === st.id);
+            return `<div class="flex items-center justify-between pb-3 border-b border-gray-100 last:border-0"><div class="flex items-center gap-3"><img src="${t.avatar}" class="w-8 h-8 rounded-full object-cover"><p class="font-bold text-sm">${t.name}</p></div><p class="font-bold">Rp ${st.rate.toLocaleString('id-ID')}</p></div>`;
+        }).join('');
+        document.getElementById('checkout-total').textContent = `Rp ${selectedTalents.reduce((sum, t) => sum + t.rate, 0).toLocaleString('id-ID')}`;
+    }
+
+    function submitCampaign() { document.getElementById('success-modal').classList.remove('hidden'); }
+    function closeSuccessModal() { document.getElementById('success-modal').classList.add('hidden'); navigateTo('home'); selectedTalents=[]; }
+
+    // DASHBOARD TALENT LOGIC
+    function switchTalentTab(tab) {
+        document.getElementById('talent-tab-workspace').classList.add('hidden');
+        document.getElementById('talent-tab-mycourses').classList.add('hidden');
+        document.getElementById('talent-tab-' + tab).classList.remove('hidden');
+        document.getElementById('nav-workspace').className = 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 font-medium transition-colors';
+        document.getElementById('nav-mycourses').className = 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 font-medium transition-colors';
+        document.getElementById('nav-' + tab).className = 'w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 text-brand-blue font-semibold transition-colors';
+    }
+    
+    function handleOffer(btn, action) {
+        const card = btn.closest('.group');
+        if (action === 'accept') { btn.innerHTML = 'Diterima ✓'; btn.className = 'w-full bg-green-100 text-green-700 font-bold py-2.5 rounded-xl text-sm'; btn.previousElementSibling?.remove(); showToast('Berhasil Diterima', 'success'); }
+        else { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; btn.innerHTML = 'Ditolak'; }
+    }
+
+    // DASHBOARD ADMIN LOGIC
+    function switchAdminTab(tab) {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
+        document.getElementById('admin-tab-' + tab).classList.remove('hidden');
+        document.getElementById('nav-admin-overview').className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium transition-colors';
+        document.getElementById('nav-admin-campaigns').className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium transition-colors';
+        document.getElementById('nav-admin-' + tab).className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-800 text-white font-medium transition-colors';
+    }
+
+    function verifyPayment(id) {
+        const statusBadge = document.getElementById('admin-status-' + id);
+        const btn = document.getElementById('admin-btn-verify-' + id);
+        
+        statusBadge.className = 'bg-blue-100 text-brand-blue px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider';
+        statusBadge.innerText = 'Processing';
+        
+        btn.className = 'bg-gray-100 text-gray-400 px-4 py-2 rounded-lg font-bold text-xs cursor-not-allowed';
+        btn.innerText = 'Terverifikasi ✓';
+        btn.disabled = true;
+        
+        showToast('Pembayaran berhasil diverifikasi. Campaign dilanjutkan ke Talent.', 'success');
+    }
+
+    function showToast(msg, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast-slide ${type==='success'?'bg-green-600':'bg-red-500'} text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium mb-2`;
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 2700);
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
